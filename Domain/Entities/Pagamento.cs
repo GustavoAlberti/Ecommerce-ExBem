@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Entities.Enum;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace Domain.Entities
     {
         public int Id { get; private set; }
         public int PedidoId { get; private set; }
-        public string TipoPagamento { get; private set; } // e.g., "Pix", "Cartão de Crédito"
+        public TipoPagamento TipoPagamento { get; private set; } // Agora usando enum
         public decimal Valor { get; private set; }
         public DateTime DataPagamento { get; private set; }
         public bool PagamentoConcluido { get; private set; }
@@ -19,14 +20,14 @@ namespace Domain.Entities
         private Pagamento() { }
 
         // Construtor para inicialização de um pagamento
-        public Pagamento(int pedidoId, string tipoPagamento, decimal valor, int? numeroParcelas = null)
+        public Pagamento(int pedidoId, TipoPagamento tipoPagamento, decimal valor, int? numeroParcelas = null)
         {
             PedidoId = pedidoId;
-            TipoPagamento = tipoPagamento ?? throw new ArgumentNullException(nameof(tipoPagamento));
+            TipoPagamento = tipoPagamento;
             Valor = valor;
             DataPagamento = DateTime.UtcNow;
             PagamentoConcluido = false;
-            NumeroParcelas = (tipoPagamento == "Cartão de Crédito") ? numeroParcelas : 1;
+            NumeroParcelas = (tipoPagamento == TipoPagamento.CartaoDeCredito) ? numeroParcelas : 1;
         }
 
         public bool ConcluirPagamento()

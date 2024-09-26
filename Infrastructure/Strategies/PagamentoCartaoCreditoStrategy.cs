@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces.PagamentoStrategy;
 using Domain.Entities;
+using Domain.Entities.Enum;
 using Domain.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
@@ -35,7 +36,7 @@ namespace Infrastructure.Strategies
             {
                 var valorParcela = pedido.ValorTotal / numeroParcelas;
 
-                var pagamento = new Pagamento(pedido.Id, "Cartão de Crédito", pedido.ValorTotal, numeroParcelas);
+                var pagamento = new Pagamento(pedido.Id, TipoPagamento.CartaoDeCredito, pedido.ValorTotal, numeroParcelas);
                 pagamento.ConcluirPagamento();
 
                 

@@ -13,6 +13,7 @@ namespace Application.Interfaces
         Task<PedidoResponseDto> CriarPedidoAsync(CriarPedidoDto dto);
         Task<PedidoResponseDto> BuscarPorCodigoPedidoAsync(string codigoPedido);
         Task CancelarPedidoAsync(string codigoPedido);
+        Task<bool> SepararPedidoAsync(string codigoPedido);
     }
 
 }

@@ -1,4 +1,6 @@
-﻿namespace Domain.Entities
+﻿using Domain.Entities.Enum;
+
+namespace Domain.Entities
 {
     public class Pedido
     {

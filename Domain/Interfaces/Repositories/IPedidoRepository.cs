@@ -10,8 +10,9 @@ namespace Domain.Interfaces.Repositories
     public interface IPedidoRepository
     {
         Task<Pedido> ObterPorCodigoPedidoAsync(string codigoPedido);
+
+        Task<Pedido> ObterPorCodigoPedidoAsync2(string codigoPedido, bool incluirPagamento = false);
         Task AdicionarAsync(Pedido pedido);
-        Task CancelarAsync(Pedido pedido);
         Task AtualizarAsync(Pedido pedido);
     }
 }

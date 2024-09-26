@@ -72,6 +72,19 @@ namespace Api.Controllers
             }
         }
 
+        [HttpPost("{codigoPedido}/separar")]
+        public async Task<IActionResult> SepararPedido(string codigoPedido)
+        {
+            var resultado = await _pedidoService.SepararPedidoAsync(codigoPedido);
+
+            if (!resultado)
+            {
+                return BadRequest(new { mensagem = "Erro ao separar o pedido. Verifique o estoque ou o estado do pedido." });
+            }
+
+            return Ok(new { mensagem = "Pedido separado com sucesso!" });
+        }
+
 
     }
 

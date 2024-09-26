@@ -1,8 +1,7 @@
-using Application.Enum;
 using Application.Interfaces;
 using Application.Interfaces.PagamentoStrategy;
-using Application.Interfaces.ProcessadoresPagamento;
 using Application.Services;
+using Domain.Entities.Enum;
 using Domain.Interfaces.Repositories;
 using Infrastructure.Data;
 using Infrastructure.Repositories;

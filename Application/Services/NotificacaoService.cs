@@ -10,32 +10,30 @@ namespace Application.Services
 {
     public class NotificacaoService : INotificacaoService
     {
-        //public Task EnviarNotificacaoStatusPedido(Pedido pedido, string mensagem)
-        //{
-        //    // Enviar e-mail com o novo status do pedido
-        //    return Task.CompletedTask;
-        //}
-
-        //public Task EnviarNotificacaoEstoqueInsuficiente(Pedido pedido)
-        //{
-        //    // Notificar sobre falta de estoque
-        //    return Task.CompletedTask;
-        //}
-
-        public Task EnviarNotificacaoStatusPedidoAsync(Pedido pedido, string mensagem)
+        public async Task EnviarNotificacaoStatusPedidoAsync(Pedido pedido, string mensagem)
         {
-            //Implementar lógica de envio de e - mail para o cliente
-            return Task.CompletedTask;
+            // Lógica para enviar notificação sobre o status do pedido
+            var notificacaoMensagem = $"Pedido {pedido.CodigoPedido}: {mensagem}";
+            await EnviarNotificacaoAsync("notificacoes@empresa.com", "Atualização de Status do Pedido", notificacaoMensagem);
         }
 
-        public Task EnviarNotificacaoEstoqueInsuficienteAsync(Pedido pedido)
+        public async Task EnviarNotificacaoEstoqueInsuficienteAsync(Pedido pedido)
         {
-            // Implementar lógica de envio de e-mail para o departamento de vendas
-            return Task.CompletedTask;
+            // Lógica para enviar notificação sobre estoque insuficiente
+            var mensagem = $"O produto do pedido {pedido.CodigoPedido} está com estoque insuficiente.";
+            await EnviarNotificacaoAsync("vendas@empresa.com", "Estoque Insuficiente", mensagem);
         }
 
-        public Task EnviarNotificacaoErroAsync(string mensagem)
+        public async Task EnviarNotificacaoErroAsync(string mensagem)
         {
+            // Lógica para enviar notificação de erro
+            await EnviarNotificacaoAsync("suporte@empresa.com", "Erro no Sistema", mensagem);
+        }
+
+        private Task EnviarNotificacaoAsync(string destinatario, string assunto, string mensagem)
+        {
+            // Simulação de envio de notificação (e-mail ou outro tipo de mensagem)
+            Console.WriteLine($"Enviando notificação para {destinatario}:\nAssunto: {assunto}\nMensagem: {mensagem}");
             return Task.CompletedTask;
         }
     }

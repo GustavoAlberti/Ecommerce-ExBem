@@ -1,6 +1,7 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
 using Domain.Entities;
+using Domain.Entities.Enum;
 using Domain.Interfaces.Repositories;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -14,20 +15,59 @@ namespace Application.Services
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IProdutoRepository _produtoRepository;
         private readonly IDescontoRepository _descontoRepository;
+        private readonly INotificacaoService _notificacaoService;
+        private readonly IPagamentoRepository _pagamentoRepository;
 
 
-        public PedidoService(IPedidoRepository pedidoRepository, IUsuarioRepository usuarioRepository, IProdutoRepository produtoRepository, IDescontoRepository descontoRepository)
+        public PedidoService(IPedidoRepository pedidoRepository, IUsuarioRepository usuarioRepository, IProdutoRepository produtoRepository, IDescontoRepository descontoRepository, INotificacaoService notificacaoService, IPagamentoRepository pagamentoRepository)
         {
             _pedidoRepository = pedidoRepository;
             _usuarioRepository = usuarioRepository;
             _produtoRepository = produtoRepository;
             _descontoRepository = descontoRepository;
+            _notificacaoService = notificacaoService;
+            _pagamentoRepository = pagamentoRepository;
+        }
+
+        public async Task<bool> SepararPedidoAsync(string codigoPedido)
+        {
+            var pedido = await _pedidoRepository.ObterPorCodigoPedidoAsync2(codigoPedido);
+
+            if (pedido is null || pedido.Status != StatusPedido.PagamentoConcluido)
+                return false; 
+            
+            pedido.AlterarStatus(StatusPedido.SeparandoPedido);
+            await _pedidoRepository.AtualizarAsync(pedido);
+
+            foreach (var item in pedido.Itens)
+            {
+                var produto = item.Produto;  // Produto já presente no pedido
+
+                if (produto.QuantidadeEmEstoque < item.Quantidade)
+                {
+                    // Alterar estado para "Aguardando Estoque" e enviar notificação por e-mail
+                    pedido.AlterarStatus(StatusPedido.AguardandoEstoque);
+                    await _notificacaoService.EnviarNotificacaoEstoqueInsuficienteAsync(pedido);
+                    await _pedidoRepository.AtualizarAsync(pedido);
+                    return false;
+                }
+
+                // Ajustar estoque diretamente no produto
+                produto.AjustarEstoque(item.Quantidade);
+            }
+
+            // Se tudo estiver correto, finalizar o pedido
+            pedido.AlterarStatus(StatusPedido.Concluido);
+            await _notificacaoService.EnviarNotificacaoStatusPedidoAsync(pedido, "Pedido Concluído com sucesso.");
+            await _pedidoRepository.AtualizarAsync(pedido);
+
+            return true;
         }
 
         public async Task<PedidoResponseDto> BuscarPorCodigoPedidoAsync(string codigoPedido)
         {
             // Obter o pedido pelo repositório
-            var pedido = await _pedidoRepository.ObterPorCodigoPedidoAsync(codigoPedido);
+            var pedido = await _pedidoRepository.ObterPorCodigoPedidoAsync2(codigoPedido);
 
             if (pedido == null)
             {
@@ -52,21 +92,32 @@ namespace Application.Services
         public async Task CancelarPedidoAsync(string codigoPedido)
         {
             // Obter o pedido pelo repositório
-            var pedido = await _pedidoRepository.ObterPorCodigoPedidoAsync(codigoPedido);
+            var pedido = await _pedidoRepository.ObterPorCodigoPedidoAsync2(codigoPedido, incluirPagamento: true);
 
             if (pedido == null)
             {
                 throw new Exception("Pedido não encontrado.");
             }
 
-            // Verificar se o pedido pode ser cancelado
-            if (pedido.Status != StatusPedido.AguardandoPagamento)
+            // Verificar se o pedido está no status Aguardando Pagamento ou Aguardando Estoque
+            if (pedido.Status != StatusPedido.AguardandoPagamento && pedido.Status != StatusPedido.AguardandoEstoque)
             {
                 throw new InvalidOperationException("O pedido não pode ser cancelado.");
             }
 
-            // Cancelar o pedido e excluir o carrinho usando o repositório
-            await _pedidoRepository.CancelarAsync(pedido);
+            // Se o pedido está no status Aguardando Estoque, realizar o estorno do pagamento
+            if (pedido.Status == StatusPedido.AguardandoEstoque)
+            {
+                pedido.Pagamento.CancelarPagamento(); 
+                await _pagamentoRepository.AtualizarPagamentoAsync(pedido.Pagamento);
+            }
+
+            // Atualizar o status do pedido para cancelado
+            pedido.AlterarStatus(StatusPedido.Cancelado);
+            await _pedidoRepository.AtualizarAsync(pedido);
+
+            // Enviar notificação ao usuário
+            await _notificacaoService.EnviarNotificacaoStatusPedidoAsync(pedido, "Seu pedido foi cancelado e o pagamento estornado.");
         }
 
         public async Task<PedidoResponseDto> CriarPedidoAsync(CriarPedidoDto dto)

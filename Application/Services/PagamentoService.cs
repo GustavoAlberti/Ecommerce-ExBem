@@ -1,10 +1,8 @@
 ﻿using Application.DTOs;
-using Application.Enum;
 using Application.Interfaces;
 using Application.Interfaces.PagamentoStrategy;
-using Domain.Entities;
+using Domain.Entities.Enum;
 using Domain.Interfaces.Repositories;
-using Infrastructure.Strategies;
 
 
 namespace Application.Services
@@ -22,7 +20,20 @@ namespace Application.Services
 
         public async Task<PagamentoResponseDto> ProcessarPagamentoAsync(PagarPedidoDto pagamentoDto)
         {
-            var pedido = await _pedidoRepository.ObterPorCodigoPedidoAsync(pagamentoDto.CodigoPedido);
+            var pedido = await _pedidoRepository.ObterPorCodigoPedidoAsync2(pagamentoDto.CodigoPedido);
+
+            // Verifica se o pagamento já foi concluído
+            if (pedido.Status == StatusPedido.PagamentoConcluido)
+            {
+                return new PagamentoResponseDto(
+                    "O pagamento já foi realizado anteriormente.",
+                    pedido.Itens.Sum(i => i.Preco * i.Quantidade),
+                    pedido.Pagamento.Valor,
+                    pedido.Pagamento.NumeroParcelas,
+                    pedido.Pagamento.TipoPagamento.ToString(),
+                    "Pagamento Concluído"
+                );
+            }
 
             pedido.AlterarStatus(StatusPedido.ProcessandoPagamento);
             await _pedidoRepository.AtualizarAsync(pedido);
@@ -40,18 +51,19 @@ namespace Application.Services
                     );
             }
 
-            bool pagamentoConcluido = await strategy.ProcessarPagamentoAsync(pedido, pagamentoDto.NumeroParcelas);
+            var pagamentoConcluido = await strategy.ProcessarPagamentoAsync(pedido, pagamentoDto.NumeroParcelas);
 
             if (pagamentoConcluido)
             {
+
                 return new PagamentoResponseDto(
-                    "Pagamento realizado com sucesso.",
-                    pedido.Itens.Sum(i => i.Preco * i.Quantidade),
-                    pedido.Pagamento.Valor, // Verifica se há valor com desconto
-                    pedido.Pagamento.NumeroParcelas,
-                    pedido.Pagamento.TipoPagamento.ToString(),
-                    "Pagamento Concluído"
-                );
+                        "Pagamento realizado com sucesso.",
+                        pedido.Itens.Sum(i => i.Preco * i.Quantidade),
+                        pedido.Pagamento.TipoPagamento == TipoPagamento.CartaoDeCredito ? null : pedido.Pagamento.Valor,
+                        pedido.Pagamento.TipoPagamento == TipoPagamento.CartaoDeCredito ? pedido.Pagamento.NumeroParcelas : null,
+                        pedido.Pagamento.TipoPagamento.ToString(),
+                        "Pagamento Concluído"
+                    );
             }
 
             // Atualizar estado do pedido para "Cancelado" (caso o pagamento não seja concluído)
@@ -62,7 +74,7 @@ namespace Application.Services
             return new PagamentoResponseDto(
                 "Falha no processamento do pagamento.",
                 pedido.Pagamento.Valor,
-                pedido.Pagamento.Valor, // Verifica se há valor com desconto
+                pedido.Pagamento.Valor,
                 pedido.Pagamento.NumeroParcelas,
                 pedido.Pagamento.TipoPagamento.ToString(),
                 "Cancelado"

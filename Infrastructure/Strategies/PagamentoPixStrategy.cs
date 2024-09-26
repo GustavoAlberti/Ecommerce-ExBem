@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces.PagamentoStrategy;
 using Domain.Entities;
+using Domain.Entities.Enum;
 using Domain.Interfaces.Repositories;
 
 namespace Infrastructure.Strategies
@@ -29,7 +30,7 @@ namespace Infrastructure.Strategies
         {
             try
             {
-                var pagamento = new Pagamento(pedido.Id, "Pix", pedido.ValorTotal, 1);
+                var pagamento = new Pagamento(pedido.Id, TipoPagamento.Pix, pedido.ValorTotal, 1);
 
                 pagamento.ConcluirPagamento();
 

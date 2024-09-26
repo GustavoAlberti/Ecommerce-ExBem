@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Entities
+namespace Domain.Entities.Enum
 {
     public enum StatusPedido
     {
-        AguardandoPagamento =1,
+        AguardandoPagamento = 1,
         ProcessandoPagamento = 2,
         PagamentoConcluido = 3,
         SeparandoPedido = 4,
