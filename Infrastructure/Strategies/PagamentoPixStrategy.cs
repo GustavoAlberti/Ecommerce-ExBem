@@ -41,7 +41,7 @@ namespace Infrastructure.Strategies
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 if (tentativaAtual >= MaxTentativas)
                     return false;

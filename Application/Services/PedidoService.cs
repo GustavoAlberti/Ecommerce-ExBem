@@ -52,11 +52,9 @@ namespace Application.Services
                     return false;
                 }
 
-                // Ajustar estoque diretamente no produto
                 produto.AjustarEstoque(item.Quantidade);
             }
 
-            // Se tudo estiver correto, finalizar o pedido
             pedido.AlterarStatus(StatusPedido.Concluido);
             await _notificacaoService.EnviarNotificacaoStatusPedidoAsync(pedido, "Pedido Concluído com sucesso.");
             await _pedidoRepository.AtualizarAsync(pedido);

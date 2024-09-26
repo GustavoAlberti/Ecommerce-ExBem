@@ -42,6 +42,7 @@ namespace Domain.Entities
 
             QuantidadeEmEstoque -= quantidade; 
         }
+
     }
 
 }

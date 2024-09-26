@@ -10,7 +10,6 @@ namespace Infrastructure.Data
         {
         }
 
-        // DbSets para as entidades
         public DbSet<Pedido> Pedidos { get; set; }
         public DbSet<Produto> Produtos { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
@@ -32,23 +31,21 @@ namespace Infrastructure.Data
                 entity.Property(e => e.CodigoPedido).IsRequired().HasMaxLength(8);
                 entity.Property(e => e.ValorTotal).HasColumnType("decimal(18,2)");
 
-                // Configuração alterada para evitar múltiplos caminhos de exclusão em cascata
                 entity.HasOne(e => e.Usuario)
                       .WithMany()
                       .HasForeignKey(e => e.UsuarioId)
-                      .OnDelete(DeleteBehavior.Restrict); // Alterado de Cascade para Restrict
+                      .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasMany(e => e.Itens)
                       .WithOne(i => i.Pedido)
                       .HasForeignKey(i => i.PedidoId)
-                      .OnDelete(DeleteBehavior.Cascade); // Mantém o Cascade nos itens
+                      .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(e => e.Pagamento)
                       .WithOne()
                       .HasForeignKey<Pagamento>(p => p.PedidoId);
             });
 
-            // Configurações da tabela Produto
             modelBuilder.Entity<Produto>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -59,7 +56,7 @@ namespace Infrastructure.Data
                 entity.Property(e => e.Preco).HasColumnType("decimal(18,2)");
             });
 
-            // Configurações da tabela Usuario
+            
             modelBuilder.Entity<Usuario>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -76,7 +73,6 @@ namespace Infrastructure.Data
             });
 
 
-            // Configurações da tabela ItemPedido
             modelBuilder.Entity<ItemPedido>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -92,7 +88,7 @@ namespace Infrastructure.Data
 
             });
 
-            // Configurações da tabela Desconto
+            
             modelBuilder.Entity<Desconto>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -100,7 +96,7 @@ namespace Infrastructure.Data
                 entity.Property(e => e.ValorDesconto).HasColumnType("decimal(18,2)");
             });
 
-            // Configurações da tabela Notificacao
+            
             modelBuilder.Entity<Notificacao>(entity =>
             {
                 entity.HasKey(e => e.NotificacaoId);

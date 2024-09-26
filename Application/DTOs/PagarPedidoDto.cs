@@ -9,10 +9,10 @@ namespace Application.DTOs
         public string CodigoPedido { get; init; }
 
         [Required(ErrorMessage = "O tipo de pagamento é obrigatório.")]
-        public TipoPagamento TipoPagamento { get; init; } // Usando o enum de forma clara
+        public TipoPagamento TipoPagamento { get; init; }
 
         [Range(1, 12, ErrorMessage = "O número de parcelas deve estar entre 1 e 12.")]
-        public int? NumeroParcelas { get; init; } // Aplicável apenas para Cartão de Crédito
+        public int? NumeroParcelas { get; init; }
     }
 
 }
