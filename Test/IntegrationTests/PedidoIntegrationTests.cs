@@ -1,29 +1,24 @@
 ﻿using Application.Commands;
 using Application.DTOs;
-using Domain.Entities;
 using Domain.Entities.Enum;
-using Infrastructure.Data;
-using Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Shouldly;
 using System.Text;
-using Xunit;
 
 namespace Test.IntegrationTests
 {
-    public class PedidoIntegrationTests : IClassFixture<CustomWebApplicationFactory<Program>>, IClassFixture<DatabaseFixture>
+    public class PedidoIntegrationTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
-        private readonly CustomWebApplicationFactory<Program> _factory;
         private readonly HttpClient _client;
+        private readonly CustomWebApplicationFactory<Program> _factory;
         private readonly DatabaseFixture _fixture;
 
-        public PedidoIntegrationTests(CustomWebApplicationFactory<Program> factory, DatabaseFixture fixture)
+        public PedidoIntegrationTests(CustomWebApplicationFactory<Program> factory)
         {
             _factory = factory;
             _client = factory.CreateClient();
-            _fixture = fixture;
+
+            _fixture =  new DatabaseFixture(_factory.GetDataBaseNome());
         }
 
         [Fact]
@@ -56,7 +51,12 @@ namespace Test.IntegrationTests
         [Fact]
         public async Task CancelarPedido_DeveRetornarSucesso_ViaApi()
         {
-            var codigoPedido = "TEST1234";
+            // Arrange: Obtém o código de um pedido que foi inserido na fixture
+            var codigoPedido = "PEDIDO2";
+
+            // Atualiza o status do pedido para 'Pagamento Concluído' para permitir a separação
+            await _fixture.AlterarStatusPedido(codigoPedido, StatusPedido.AguardandoEstoque);
+
 
             // Act
             var response = await _client.PutAsync($"/api/Pedidos/CancelarPedido/{codigoPedido}", null);
@@ -87,6 +87,31 @@ namespace Test.IntegrationTests
 
             Assert.NotNull(result);
             Assert.Equal(codigoPedido, result.CodigoPedido);
+        }
+
+        [Fact]
+        public async Task SepararPedido_DeveConcluirComSucesso_ViaApi()
+        {
+            // Arrange: Obtém o código de um pedido que foi inserido na fixture
+            var codigoPedido = "TEST1234";
+
+            // Atualiza o status do pedido para 'Pagamento Concluído' para permitir a separação
+            await _fixture.AlterarStatusPedido(codigoPedido, StatusPedido.PagamentoConcluido);
+
+
+            // Act: Envia a requisição POST para separar o pedido
+            var response = await _client.PostAsync($"/api/Pedidos/{codigoPedido}/separar", null);
+
+            // Assert: Verifica se o status de retorno é 200 OK
+            response.EnsureSuccessStatusCode();
+
+            // Verifica o conteúdo da resposta
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<dynamic>(jsonResponse); // Converte a resposta para um objeto dinâmico
+
+            // Verifica se a mensagem de sucesso foi retornada
+            string mensagem = result.mensagem;
+            mensagem.ShouldBe("Pedido separado com sucesso!");
         }
     }
 }
