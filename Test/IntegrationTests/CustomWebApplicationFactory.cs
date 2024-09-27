@@ -4,33 +4,30 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup : class
+namespace Test.IntegrationTests
 {
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram> where TProgram : class
     {
-        builder.UseEnvironment("Testing"); 
-
-        builder.ConfigureServices(services =>
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            
-            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<ECommerceDbContext>));
-            if (descriptor != null)
-            {
-                services.Remove(descriptor);
-            }
+            builder.UseEnvironment("Testing");
 
-            services.AddDbContext<ECommerceDbContext>(options =>
+            builder.ConfigureServices(services =>
             {
-                options.UseInMemoryDatabase("TestDb");
+                // Remove o DbContext existente
+                var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<ECommerceDbContext>));
+                if (descriptor != null)
+                {
+                    services.Remove(descriptor);
+                }
+
+                // Adiciona o banco de dados em memória
+                services.AddDbContext<ECommerceDbContext>(options =>
+                    options.UseInMemoryDatabase("TestDb"));
+
+                Console.WriteLine("Banco de dados em memória configurado para testes.");
             });
-
-            // Aplicar migrações no banco de dados de teste
-            var sp = services.BuildServiceProvider();
-            using (var scope = sp.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<ECommerceDbContext>();
-                db.Database.Migrate();
-            }
-        });
+        }
     }
+
 }

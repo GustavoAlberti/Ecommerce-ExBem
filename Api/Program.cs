@@ -8,25 +8,21 @@ using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Infrastructure.Strategies;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configurando a string de conexão (exemplo para SQL Server)
-// A string de conexão agora será diferenciada com base no ambiente para suportar testes de integração
+Console.WriteLine("Ambiente atual: " + builder.Environment.EnvironmentName); // Verifica o ambiente atual
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Verifica se o ambiente é de teste (dentro dos testes, você configuraria "Testing" como o nome do ambiente)
 if (builder.Environment.IsEnvironment("Testing"))
 {
-    // Se for ambiente de testes, utiliza o banco de dados em memória
     builder.Services.AddDbContext<ECommerceDbContext>(options =>
         options.UseInMemoryDatabase("TestDb"));
 }
 else
 {
-    // Caso contrário, usa a conexão normal (SQL Server no exemplo)
     builder.Services.AddDbContext<ECommerceDbContext>(options =>
         options.UseSqlServer(connectionString));
 }
@@ -68,7 +64,6 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -80,5 +75,4 @@ app.UseAuthorization();
 app.MapControllers();
 app.Run();
 
-// Método estático necessário para rodar o WebApplicationFactory nos testes de integração
 public partial class Program { }
