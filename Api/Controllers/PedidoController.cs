@@ -1,65 +1,48 @@
-﻿using Application.DTOs;
-using Application.Interfaces;
+﻿using Application.Commands;
+using Application.DTOs;
+using Application.Querys;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class PedidosController : ControllerBase
     {
-        private readonly IPedidoService _pedidoService;
+        private readonly IMediator _mediator;
 
-        public PedidosController(IPedidoService pedidoService)
+        public PedidosController(IMediator mediator)
         {
-            _pedidoService = pedidoService;
+            _mediator = mediator;
         }
 
-        // POST: api/pedidos/criarPedido
         [HttpPost("CriarPedido")]
-        public async Task<IActionResult> CriarPedido([FromBody] CriarPedidoDto dto)
+        public async Task<IActionResult> CriarPedido([FromBody] CriarPedidoDto request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            try
-            {
-                // Chama o serviço para criar o pedido
-                var pedidoCriado = await _pedidoService.CriarPedidoAsync(dto);
+            var command = new CriarPedidoCommand(
+                request.UsuarioLogin,
+                request.Itens.Select(i => new CriarItemPedidoCommand(i.CodigoProduto, i.Quantidade))
+            );
 
-                // Retorna o pedido criado
-                return CreatedAtAction(nameof(CriarPedido), new { codigoPedido = pedidoCriado.CodigoPedido }, pedidoCriado);
-            }
-            catch (Exception ex)
-            {
-                // Retorna erro em caso de exceção
-                return StatusCode(500, new { mensagem = "Erro ao criar pedido", detalhes = ex.Message });
-            }
+            var pedidoCriado = await _mediator.Send(command);
+
+            return CreatedAtAction(nameof(CriarPedido), new { codigoPedido = pedidoCriado.CodigoPedido }, pedidoCriado);
         }
 
-        [HttpGet("BuscarPorCodigo/{codigoPedido}")]
-        public async Task<IActionResult> BuscarPorCodigoPedido(string codigoPedido)
-        {
-            try
-            {
-                var pedido = await _pedidoService.BuscarPorCodigoPedidoAsync(codigoPedido);
-                return Ok(pedido);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(new { mensagem = ex.Message });
-            }
-        }
-
-        // PUT: api/pedidos/CancelarPedido/{codigoPedido}
         [HttpPut("CancelarPedido/{codigoPedido}")]
         public async Task<IActionResult> CancelarPedido(string codigoPedido)
         {
+            var command = new CancelarPedidoCommand(codigoPedido);
+
             try
             {
-                await _pedidoService.CancelarPedidoAsync(codigoPedido);
+                await _mediator.Send(command);
                 return Ok(new { mensagem = "Pedido cancelado com sucesso" });
             }
             catch (InvalidOperationException ex)
@@ -72,10 +55,28 @@ namespace Api.Controllers
             }
         }
 
+        [HttpGet("BuscarPorCodigo/{codigoPedido}")]
+        public async Task<IActionResult> BuscarPorCodigoPedido(string codigoPedido)
+        {
+            var query = new BuscarPedidoQuery(codigoPedido);
+
+            try
+            {
+                var pedido = await _mediator.Send(query);
+                return Ok(pedido);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { mensagem = ex.Message });
+            }
+        }
+
         [HttpPost("{codigoPedido}/separar")]
         public async Task<IActionResult> SepararPedido(string codigoPedido)
         {
-            var resultado = await _pedidoService.SepararPedidoAsync(codigoPedido);
+            var command = new SepararPedidoCommand(codigoPedido);
+
+            var resultado = await _mediator.Send(command);
 
             if (!resultado)
             {

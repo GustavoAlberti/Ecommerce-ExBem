@@ -2,12 +2,6 @@
 using Domain.Entities;
 using Domain.Entities.Enum;
 using Domain.Interfaces.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Strategies
 {
@@ -48,13 +42,13 @@ namespace Infrastructure.Strategies
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 if (tentativaAtual >= MaxTentativas)
                     return false;
                 
 
-                await Task.Delay(TimeSpan.FromSeconds(2)); // Espera antes da próxima tentativa
+                await Task.Delay(TimeSpan.FromSeconds(2));
 
                 return await TentarProcessarPagamentoComRetentativaAsync(pedido, numeroParcelas, tentativaAtual + 1);
             }

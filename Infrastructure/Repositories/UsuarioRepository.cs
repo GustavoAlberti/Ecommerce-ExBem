@@ -16,10 +16,11 @@ namespace Infrastructure.Repositories
 
         public async Task<Usuario> ObterPorLoginAsync(string usuarioLogin)
         {
-            return await _context.Usuarios
-                .Where(u => u.UsuarioLogin == usuarioLogin)
-                .FirstOrDefaultAsync();
+            var usuario = await _context.Usuarios
+             .Where(u => u.UsuarioLogin == usuarioLogin)
+             .FirstOrDefaultAsync();
 
+            return usuario ?? throw new InvalidOperationException("Usuário não encontrado.");
         }
     }
 

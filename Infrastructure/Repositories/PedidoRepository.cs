@@ -1,5 +1,4 @@
 ﻿using Domain.Entities;
-using Domain.Entities.Enum;
 using Domain.Interfaces.Repositories;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -44,7 +43,7 @@ namespace Infrastructure.Repositories
 
         }
 
-        public async Task<Pedido> ObterPorCodigoPedidoAsync2(string codigoPedido, bool incluirPagamento = false)
+        public async Task<Pedido> ObterPorCodigoPedidoAsync(string codigoPedido, bool incluirPagamento = false)
         {
             var query = _context.Pedidos
                 .Include(p => p.Itens)

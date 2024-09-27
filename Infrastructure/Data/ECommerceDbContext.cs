@@ -27,7 +27,7 @@ namespace Infrastructure.Data
             modelBuilder.Entity<Pedido>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.Id).ValueGeneratedOnAdd(); // Auto-increment
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.Property(e => e.CodigoPedido).IsRequired().HasMaxLength(8);
                 entity.Property(e => e.ValorTotal).HasColumnType("decimal(18,2)");
 
@@ -49,10 +49,10 @@ namespace Infrastructure.Data
             modelBuilder.Entity<Produto>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.Id).ValueGeneratedOnAdd(); // Auto-increment
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.Property(e => e.Nome).IsRequired();
                 entity.Property(e => e.CodigoProduto).IsRequired().HasMaxLength(50);
-                entity.HasIndex(e => e.CodigoProduto).IsUnique(); // Código do produto deve ser único
+                entity.HasIndex(e => e.CodigoProduto).IsUnique();
                 entity.Property(e => e.Preco).HasColumnType("decimal(18,2)");
             });
 
@@ -60,10 +60,10 @@ namespace Infrastructure.Data
             modelBuilder.Entity<Usuario>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.Id).ValueGeneratedOnAdd(); // Auto-increment
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.Property(e => e.Nome).IsRequired();
                 entity.Property(e => e.UsuarioLogin).IsRequired();
-                entity.HasIndex(e => e.UsuarioLogin).IsUnique(); // Login deve ser único
+                entity.HasIndex(e => e.UsuarioLogin).IsUnique();
             });
 
             modelBuilder.Entity<Pagamento>(entity =>
@@ -76,13 +76,13 @@ namespace Infrastructure.Data
             modelBuilder.Entity<ItemPedido>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.Id).ValueGeneratedOnAdd(); // Auto-increment
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.Property(e => e.Preco).HasColumnType("decimal(18,2)");
                 entity.HasOne(e => e.Produto)
                       .WithMany()
                       .HasForeignKey(e => e.ProdutoId);
                 entity.HasOne(e => e.Pedido)
-                      .WithMany(p => p.Itens) // Um Pedido pode ter muitos ItensPedido
+                      .WithMany(p => p.Itens)
                       .HasForeignKey(e => e.PedidoId)
                       .OnDelete(DeleteBehavior.Cascade);
 
@@ -92,7 +92,7 @@ namespace Infrastructure.Data
             modelBuilder.Entity<Desconto>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.Id).ValueGeneratedOnAdd(); // Auto-increment
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.Property(e => e.ValorDesconto).HasColumnType("decimal(18,2)");
             });
 

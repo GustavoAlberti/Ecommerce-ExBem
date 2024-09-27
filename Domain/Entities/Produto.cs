@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Domain.Entities
+﻿namespace Domain.Entities
 {
     public class Produto
     {
@@ -24,16 +18,6 @@ namespace Domain.Entities
             Preco = preco;
             QuantidadeEmEstoque = quantidadeEmEstoque;
         }
-
-        
-        public void AtualizarPreco(decimal preco)
-        {
-            if (preco <= 0)
-                throw new ArgumentException("O preço deve ser maior que zero.", nameof(preco));
-
-            Preco = preco;
-        }
-
         
         public void AjustarEstoque(int quantidade)
         {

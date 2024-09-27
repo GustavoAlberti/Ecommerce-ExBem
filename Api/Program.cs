@@ -1,3 +1,4 @@
+using Application.Handlers;
 using Application.Interfaces;
 using Application.Interfaces.PagamentoStrategy;
 using Application.Services;
@@ -7,19 +8,28 @@ using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Infrastructure.Strategies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 // Configurando a string de conexão (exemplo para SQL Server)
+// A string de conexão agora será diferenciada com base no ambiente para suportar testes de integração
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-
-// Adicionando o DbContext ao container de injeção de dependência
-builder.Services.AddDbContext<ECommerceDbContext>(options =>
-    options.UseSqlServer(connectionString));
-
+// Verifica se o ambiente é de teste (dentro dos testes, você configuraria "Testing" como o nome do ambiente)
+if (builder.Environment.IsEnvironment("Testing"))
+{
+    // Se for ambiente de testes, utiliza o banco de dados em memória
+    builder.Services.AddDbContext<ECommerceDbContext>(options =>
+        options.UseInMemoryDatabase("TestDb"));
+}
+else
+{
+    // Caso contrário, usa a conexão normal (SQL Server no exemplo)
+    builder.Services.AddDbContext<ECommerceDbContext>(options =>
+        options.UseSqlServer(connectionString));
+}
 
 // Repositorios
 builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
@@ -28,12 +38,8 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IDescontoRepository, DescontoRepository>();
 builder.Services.AddScoped<IPagamentoRepository, PagamentoRepository>();
 
-
-
 // Serviços da Aplicação
-builder.Services.AddScoped<IPedidoService, PedidoService>();
 builder.Services.AddScoped<INotificacaoService, NotificacaoService>();
-builder.Services.AddScoped<IPagamentoService, PagamentoService>();
 
 // Adicionando as estratégias de pagamento
 builder.Services.AddTransient<PagamentoPixStrategy>();
@@ -46,6 +52,8 @@ builder.Services.AddScoped<IDictionary<TipoPagamento, IPagamentoStrategy>>(provi
     { TipoPagamento.CartaoDeCredito, provider.GetRequiredService<PagamentoCartaoCreditoStrategy>() }
 });
 
+// Adicionando o MediatR e registrando os Handlers
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ProcessarPagamentoCommandHandler).Assembly));
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -53,7 +61,6 @@ builder.Services.AddSwaggerGen(c =>
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.IncludeXmlComments(xmlPath);
 });
-
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -69,9 +76,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
+
+// Método estático necessário para rodar o WebApplicationFactory nos testes de integração
+public partial class Program { }

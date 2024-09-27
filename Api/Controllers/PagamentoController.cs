@@ -1,5 +1,6 @@
-﻿using Application.DTOs;
-using Application.Interfaces;
+﻿using Application.Commands;
+using Application.DTOs;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -8,11 +9,11 @@ namespace Api.Controllers
     [Route("api/[controller]")]
     public class PagamentoController : ControllerBase
     {
-        private readonly IPagamentoService _pagamentoService;
+        private readonly IMediator _mediator;
 
-        public PagamentoController(IPagamentoService pagamentoService)
+        public PagamentoController(IMediator mediator)
         {
-            _pagamentoService = pagamentoService;
+            _mediator = mediator;
         }
 
         /// <remarks>
@@ -27,16 +28,23 @@ namespace Api.Controllers
         /// Caso seja Pix enviar null
         /// </remarks>
         [HttpPost("pagar")]
-        public async Task<IActionResult> PagarPedido([FromBody] PagarPedidoDto pagamentoDto)
+        public async Task<IActionResult> PagarPedido([FromBody] PagarPedidoDto pagamentoRequest)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var pagamentoResponse = await _pagamentoService.ProcessarPagamentoAsync(pagamentoDto);
+            var command = new ProcessarPagamentoCommand(
+                pagamentoRequest.CodigoPedido,
+                pagamentoRequest.TipoPagamento,
+                pagamentoRequest.NumeroParcelas
+            );
+
+            var pagamentoResponse = await _mediator.Send(command);
 
             return pagamentoResponse.Status == "Cancelado" ? BadRequest(pagamentoResponse) : Ok(pagamentoResponse);
         }
     }
+
 }

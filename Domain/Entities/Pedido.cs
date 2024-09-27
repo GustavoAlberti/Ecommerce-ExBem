@@ -20,7 +20,6 @@ namespace Domain.Entities
             Itens = new List<ItemPedido> ();
         }
 
-        // Construtor para inicialização de um pedido
         public Pedido(int usuarioId)
         {
             UsuarioId = usuarioId;
@@ -32,12 +31,6 @@ namespace Domain.Entities
         public void AdicionarItem(ItemPedido item)
         {
             Itens.Add(item);
-            AtualizarValorTotal();
-        }
-
-        public void RemoverItem(ItemPedido item)
-        {
-            Itens.Remove(item);
             AtualizarValorTotal();
         }
 
@@ -73,25 +66,6 @@ namespace Domain.Entities
             else if (desconto.DataInicio <= DataCriacao && DataCriacao <= desconto.DataFim)
             {
                 ValorTotal -= ValorTotal * (desconto.ValorDesconto / 100);
-            }
-        }
-
-        public void TratarEstoque()
-        {
-            if (Status == StatusPedido.SeparandoPedido)
-            {
-                foreach (var item in Itens)
-                {
-                    if (item.Produto.QuantidadeEmEstoque < item.Quantidade)
-                    {
-                        AlterarStatus(StatusPedido.AguardandoEstoque);
-                        return;
-                    }
-
-                    item.Produto.AjustarEstoque(item.Quantidade);
-                }
-
-                AlterarStatus(StatusPedido.Concluido);
             }
         }
 
