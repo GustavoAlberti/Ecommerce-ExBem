@@ -14,13 +14,28 @@ namespace Infrastructure.Repositories
             _context = context;
         }
 
+        public async Task AdicionarAsync(Usuario usuario)
+        {
+            await _context.Usuarios.AddAsync(usuario);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Usuario> ObterPorEmailAsync(string email)
+        {
+            var usuario = await _context.Usuarios
+                .Where(u => u.Email == email)
+                .FirstOrDefaultAsync();
+
+            return usuario;
+        }
+
         public async Task<Usuario> ObterPorLoginAsync(string usuarioLogin)
         {
             var usuario = await _context.Usuarios
              .Where(u => u.UsuarioLogin == usuarioLogin)
              .FirstOrDefaultAsync();
 
-            return usuario ?? throw new InvalidOperationException("Usuário não encontrado.");
+            return usuario;
         }
     }
 

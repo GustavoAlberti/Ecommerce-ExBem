@@ -5,6 +5,7 @@ using Application.Services;
 using Domain.Entities.Enum;
 using Domain.Interfaces.Repositories;
 using Infrastructure.Data;
+using Infrastructure.Middleware;
 using Infrastructure.Repositories;
 using Infrastructure.Strategies;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,10 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Console.WriteLine("Ambiente atual: " + builder.Environment.EnvironmentName); // Verifica o ambiente atual
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -58,11 +62,14 @@ builder.Services.AddSwaggerGen(c =>
     c.IncludeXmlComments(xmlPath);
 });
 
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

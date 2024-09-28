@@ -34,12 +34,12 @@ namespace Test.IntegrationTests
                 var pedido2 = new Pedido(usuario.Id);
                 pedido2.AdicionarItem(new ItemPedido(produto, 2, produto.Preco));
                 typeof(Pedido).GetProperty("CodigoPedido").SetValue(pedido2, "PEDIDO2");
-
+                Context.Pedidos.Add(pedido2);
                 var pagamento = new Pagamento(pedido2.Id, TipoPagamento.Pix, 200);
-                // Usa reflection para definir o pagamento no Pedido 2
-                typeof(Pedido)
-                    .GetProperty(nameof(Pedido.Pagamento), System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                    ?.SetValue(pedido2, pagamento);
+                pagamento.ConcluirPagamento();
+                Context.Pagamentos.Add(pagamento);
+                pedido2.AlterarStatus(StatusPedido.PagamentoConcluido);
+                Context.Pedidos.Update(pedido2);
 
                 Context.Pedidos.Add(pedido);
                 Context.Pedidos.Add(pedido2);

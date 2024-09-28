@@ -21,14 +21,12 @@ namespace Test.IntegrationTests
 
             builder.ConfigureServices(services =>
             {
-                // Remove o DbContext existente
                 var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<ECommerceDbContext>));
                 if (descriptor != null)
                 {
                     services.Remove(descriptor);
                 }
 
-                // Adiciona o banco de dados em memória
                 services.AddDbContext<ECommerceDbContext>(options =>
                     options.UseInMemoryDatabase(_dbName));
 

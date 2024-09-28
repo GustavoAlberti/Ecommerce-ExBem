@@ -33,5 +33,11 @@ namespace Infrastructure.Repositories
                 .Where(p => produtoIds.Contains(p.Id))
                 .ToListAsync(); 
         }
+
+        public async Task AdicionarAsync(Produto produto)
+        {
+            await _context.Produtos.AddAsync(produto);
+            await _context.SaveChangesAsync();
+        }
     }
 }
