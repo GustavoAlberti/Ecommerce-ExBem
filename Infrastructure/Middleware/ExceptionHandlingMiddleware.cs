@@ -18,12 +18,12 @@ namespace Infrastructure.Middleware
         {
             try
             {
-                await _next(httpContext); // Chama o próximo middleware/controller
+                await _next(httpContext);
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Erro capturado pelo middleware: {ex.Message}");
-                await HandleExceptionAsync(httpContext, ex); // Lida com a exceção e responde ao cliente
+                await HandleExceptionAsync(httpContext, ex);
             }
         }
 
@@ -34,7 +34,7 @@ namespace Infrastructure.Middleware
             {
                 InvalidOperationException => StatusCodes.Status400BadRequest,
                 KeyNotFoundException => StatusCodes.Status404NotFound,
-                _ => StatusCodes.Status500InternalServerError, // Erro genérico
+                _ => StatusCodes.Status500InternalServerError,
             };
 
             var result = new

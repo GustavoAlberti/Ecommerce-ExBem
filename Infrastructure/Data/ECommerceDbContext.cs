@@ -18,11 +18,9 @@ namespace Infrastructure.Data
         public DbSet<Desconto> Descontos { get; set; }
         public DbSet<Notificacao> Notificacoes { get; set; }
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
 
             modelBuilder.Entity<Pedido>(entity =>
             {
@@ -56,7 +54,6 @@ namespace Infrastructure.Data
                 entity.Property(e => e.Preco).HasColumnType("decimal(18,2)");
             });
 
-            
             modelBuilder.Entity<Usuario>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -71,7 +68,6 @@ namespace Infrastructure.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Valor).HasColumnType("decimal(18,2)");
             });
-
 
             modelBuilder.Entity<ItemPedido>(entity =>
             {
@@ -88,7 +84,6 @@ namespace Infrastructure.Data
 
             });
 
-            
             modelBuilder.Entity<Desconto>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -96,12 +91,10 @@ namespace Infrastructure.Data
                 entity.Property(e => e.ValorDesconto).HasColumnType("decimal(18,2)");
             });
 
-            
             modelBuilder.Entity<Notificacao>(entity =>
             {
                 entity.HasKey(e => e.NotificacaoId);
             });
-
         }
     }
 }

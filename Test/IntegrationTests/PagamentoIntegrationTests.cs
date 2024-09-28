@@ -1,9 +1,6 @@
 ﻿using Application.Commands;
 using Application.DTOs;
-using Domain.Entities;
 using Domain.Entities.Enum;
-using Infrastructure.Data;
-using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Shouldly;
 using System.Text;
@@ -40,7 +37,7 @@ namespace Test.IntegrationTests
             var result = JsonConvert.DeserializeObject<PagamentoResponseDto>(jsonResponse);
 
             result.Status.ShouldBe("Pagamento Concluído");
-            result.ValorComDesconto.ShouldBe(190); // Considerando 5% de desconto
+            result.ValorComDesconto.ShouldBe(190);
         }
 
         [Fact]
@@ -59,7 +56,7 @@ namespace Test.IntegrationTests
             var result = JsonConvert.DeserializeObject<PagamentoResponseDto>(jsonResponse);
 
             result.Status.ShouldBe("Pagamento Concluído");
-            result.ValorTotal.ShouldBe(200); // Sem desconto
+            result.ValorTotal.ShouldBe(200);
         }
     }
 }

@@ -12,12 +12,11 @@ namespace Test.IntegrationTests
         public DatabaseFixture(string dbName)
         {
             var options = new DbContextOptionsBuilder<ECommerceDbContext>()
-                .UseInMemoryDatabase(dbName) // dinamico
+                .UseInMemoryDatabase(dbName)
                 .Options;
 
             Context = new ECommerceDbContext(options);
 
-            // Popula o banco de dados inicial apenas se estiver vazio
             if (!Context.Usuarios.Any())
             {
                 var usuario = new Usuario("Usuário Teste", "teste@email.com", "usuario123");
@@ -47,7 +46,6 @@ namespace Test.IntegrationTests
             }
         }
 
-        // Método auxiliar para alterar o status de um pedido
         public async Task AlterarStatusPedido(string codigoPedido, StatusPedido novoStatus)
         {
             var pedido = Context.Pedidos.FirstOrDefault(p => p.CodigoPedido == codigoPedido);
