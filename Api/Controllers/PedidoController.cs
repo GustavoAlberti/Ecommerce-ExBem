@@ -40,35 +40,18 @@ namespace Api.Controllers
         {
             var command = new CancelarPedidoCommand(codigoPedido);
 
-            try
-            {
-                await _mediator.Send(command);
-                return Ok(new { mensagem = "Pedido cancelado com sucesso" });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { mensagem = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return NotFound(new { mensagem = ex.Message });
-            }
+            await _mediator.Send(command);
+            return Ok(new { mensagem = "Pedido cancelado com sucesso" });
+            
         }
 
         [HttpGet("BuscarPorCodigo/{codigoPedido}")]
         public async Task<IActionResult> BuscarPorCodigoPedido(string codigoPedido)
         {
             var query = new BuscarPedidoQuery(codigoPedido);
-
-            try
-            {
-                var pedido = await _mediator.Send(query);
+            
+            var pedido = await _mediator.Send(query);
                 return Ok(pedido);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(new { mensagem = ex.Message });
-            }
         }
 
         [HttpPost("{codigoPedido}/separar")]
@@ -79,10 +62,8 @@ namespace Api.Controllers
             var resultado = await _mediator.Send(command);
 
             if (!resultado)
-            {
                 return BadRequest(new { mensagem = "Erro ao separar o pedido. Verifique o estoque ou o estado do pedido." });
-            }
-
+            
             return Ok(new { mensagem = "Pedido separado com sucesso!" });
         }
 

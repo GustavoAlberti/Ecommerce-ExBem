@@ -29,9 +29,7 @@ namespace Application.Handlers
             VerificarPedido(pedido);
             await VerificarStatusPedidoParaCancelamento(pedido);
 
-            // Altera o status do pedido para Cancelado
             pedido.AlterarStatus(StatusPedido.Cancelado);
-
             
             await Task.WhenAll(
                 _pedidoRepository.AtualizarAsync(pedido),
@@ -63,7 +61,7 @@ namespace Application.Handlers
 
         private async Task CancelarPagamento(Pagamento pagamento)
         {
-            pagamento.CancelarPagamento(); // Realiza o estorno do pagamento
+            pagamento.CancelarPagamento();
             await _pagamentoRepository.AtualizarPagamentoAsync(pagamento);
         }
 
